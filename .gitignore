@@ -2,6 +2,6 @@
 *.out
 *.exe
 *.in
-/src/bin/*
+/src/bin
 Cargo.toml
 /cpp
