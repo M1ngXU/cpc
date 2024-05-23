@@ -1,8 +1,11 @@
 fn main() {
     let _io = Io::new();
-    let (n, q) = r!(U, U);
-    let arr = (0..n).map(|_| r!(U)).cv();
-    // START HERE
+    for _ in 0..r!(U) {
+        // let (n, q) = r!(U, U);
+        // let n = r!(U);
+        // let a = (0..n).map(|_| r!(U)).cv();
+        // START HERE
+    }
 }
 
 pub fn lcm(u: U, v: U) -> U {

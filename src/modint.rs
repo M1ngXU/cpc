@@ -1,5 +1,8 @@
 type N = Mod<compile_error!()>;
 
+// type N = Mod<156859239850691603>;
+// const K: N = N::new(3414519959);
+
 use std::ops::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
