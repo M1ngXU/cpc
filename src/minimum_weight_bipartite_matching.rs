@@ -1,9 +1,9 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MinWBipartiteMatching {
+pub struct MinimumWeightBipartiteMatching {
     graph: Vec<Vec<(usize, isize)>>,
     alen: usize,
 }
-impl MinWBipartiteMatching {
+impl MinimumWeightBipartiteMatching {
     pub fn new(mut a: Vec<Vec<(usize, isize)>>, blen: usize) -> Self {
         for v in &mut a {
             v.sort_unstable();
