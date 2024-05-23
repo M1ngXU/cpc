@@ -1,9 +1,11 @@
+// for minimal weighted matching simply invert the edge costs,
+// but note that an empty matching (e.g. if all edges negative) has a weight of `0`
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MinimumWeightBipartiteMatching {
+pub struct MaximumWeightBipartiteMatching {
     graph: Vec<Vec<(usize, isize)>>,
     alen: usize,
 }
-impl MinimumWeightBipartiteMatching {
+impl MaximumWeightBipartiteMatching {
     pub fn new(mut a: Vec<Vec<(usize, isize)>>, blen: usize) -> Self {
         for v in &mut a {
             v.sort_unstable();
@@ -11,9 +13,10 @@ impl MinimumWeightBipartiteMatching {
         let alen = a.len();
         let mut b = vec![vec![]; blen];
         for (u, connected_to) in a.iter_mut().enumerate() {
-            for (v, _c) in connected_to.iter_mut() {
+            for (v, c) in connected_to.iter_mut() {
                 b[*v].push((u + 1, isize::MAX));
                 *v += alen + 1;
+                *c = c.saturating_neg();
             }
             connected_to.insert(0, (0, isize::MAX));
         }
@@ -45,7 +48,7 @@ impl MinimumWeightBipartiteMatching {
         matching
             .into_iter()
             .filter(|&(u, v, _)| u != 0 && v != self.graph.len() - 1)
-            .map(|(u, v, c)| (u - 1, v - 1 - self.alen, c))
+            .map(|(u, v, c)| (u - 1, v - 1 - self.alen, c.saturating_neg()))
             .cv()
     }
 
