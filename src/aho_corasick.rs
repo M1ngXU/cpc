@@ -1,5 +1,6 @@
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Vertex<const K: usize> {
+    // can be changed to "go" if first all strings are added
     next: [usize; K],
     output: bool,
     parent: usize,

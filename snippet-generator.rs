@@ -16,27 +16,46 @@ fn main() {
 
     writeln!(output, "{START}").expect("Failed to write `START`");
 
-    writeln!(
-        output,
-        r#"{INDENTPP}"template": {{
+    for file in fs::read_dir("src").expect("Failed to read `src`.") {
+        let file = file.expect("Failed to read `file`.");
+        if !file.file_type().unwrap().is_file() {
+            continue;
+        }
+        let filename = file
+            .file_name()
+            .into_string()
+            .unwrap()
+            .trim_end_matches(".rs")
+            .to_string();
+        if filename == "main" || filename == "lib" {
+            continue;
+        }
+        writeln!(
+            output,
+            r#"{INDENTPP}"{filename}": {{
 {INDENTP}"scope": "rust",
-{INDENTP}"prefix": "template",
+{INDENTP}"prefix": "{filename}",
 {INDENTP}"body": ["#,
-    )
-    .expect("Failed to write start of template json.");
-    for line in fs::read_to_string("src/template.rs")
-        .expect("Failed to read `template`.")
-        .lines()
-    {
-        let line = format!("{line:?}")
-            .replace('$', "\\\\$")
-            .replace("// START HERE", "$0");
-        writeln!(output, "{INDENT}\"{}\",", &line[1..line.len() - 1])
-            .expect("Failed to write to output.");
+        )
+        .expect("Failed to write start of template json.");
+        if filename != "template" {
+            writeln!(output, "{INDENT}\"$0\",").expect("Failed to write cursor position.");
+        }
+        for line in fs::read_to_string(file.path())
+            .expect("Failed to read file.")
+            .lines()
+        {
+            let line = format!("{line:?}")
+                .replace('$', "\\\\$")
+                .replace("// START HERE", "$0");
+            writeln!(output, "{INDENT}\"{}\",", &line[1..line.len() - 1])
+                .expect("Failed to write to output.");
+        }
+        writeln!(output, "{INDENTP}]")
+            .expect("Failed to write closing bracket for `body` to output.");
+        writeln!(output, "{INDENTPP}}},")
+            .expect("Failed to write closing bracket for `snippet` line to output.");
     }
-    writeln!(output, "{INDENTP}]").expect("Failed to write closing bracket for `body` to output.");
-    writeln!(output, "{INDENTPP}}},")
-        .expect("Failed to write closing bracket for `snippet` line to output.");
     writeln!(output, "{END}").expect("Failed to write `END`");
 
     output.flush().unwrap();

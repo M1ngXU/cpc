@@ -1,7 +1,7 @@
 {
     "filewatcher.commands": [
         {
-            "match": "(src\\\\template\\.rs)|(snippet-generator\\.rs)|(settings\\.json)",
+            "match": "(src\\\\[A-Za-z0-9_]+\\.rs)|(snippet-generator\\.rs)|(settings\\.json)",
             "event": "onFileChange",
             "cmd": "cargo script ${workspaceRoot}/snippet-generator.rs ${workspaceRoot}"
         }
