@@ -101,6 +101,16 @@ impl<T: Clone> IterExt4<T> for Vec<T> {
         self[self.len() - 1].clone()
     }
 }
+impl<T: Clone> IterExt4<T> for &[T] {
+    fn l(&self) -> T {
+        self[self.len() - 1].clone()
+    }
+}
+impl<T: Clone> IterExt4<T> for &mut [T] {
+    fn l(&self) -> T {
+        self[self.len() - 1].clone()
+    }
+}
 
 // from https://github.com/TecTrixer/cp-template/blob/main/temp.rs
 use lib::*;

@@ -4,4 +4,6 @@
 *.in
 /src/bin
 Cargo.toml
+/src/bin2
+Cargo2.toml
 /cpp
