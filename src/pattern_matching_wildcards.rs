@@ -1,58 +1,60 @@
-// requires fft, complex
+// requires ntt, modint
 
 /// `a`, `b` lowercase latin character or wildcard
-pub fn wildcard_match(a: &str, b: &str, wildcard: char) -> Vec<bool> {
+/// `a`, `b` lowercase latin character or wildcard
+pub fn wildcard_match(a: &[char], b: &[char], wildcard: char) -> Vec<bool> {
+    let mut rng = Rng::new();
+    let enc = (0..26)
+        .map(|_| M::new(rng.next() as U))
+        .map(|x| if x.0 < 5 { x + 5 } else { x })
+        .map(|x| (x, M::ONE / x))
+        .cv();
     let ap = a
-        .chars()
+        .iter()
+        .copied()
         .map(|c| {
             if c == wildcard {
-                None
+                M::ZERO
             } else {
-                Some(c as usize - b'a' as usize)
+                enc[c as usize - b'a' as usize].0
             }
-        })
-        .map(|x| x.map(|x| 2. * PI / 26. * x as F))
-        .map(|ang| {
-            ang.map(|ang| Complex(ang.cos(), ang.sin()))
-                .unwrap_or(Complex::ZERO)
         })
         .cv();
     let bp = b
-        .chars()
+        .iter()
+        .copied()
         .map(|c| {
             if c == wildcard {
-                None
+                M::ZERO
             } else {
-                Some(c as usize - b'a' as usize)
+                enc[c as usize - b'a' as usize].1
             }
-        })
-        .map(|x| x.map(|x| 2. * PI / 26. * x as F))
-        .map(|ang| {
-            ang.map(|ang| Complex(ang.cos(), -ang.sin()))
-                .unwrap_or(Complex::ZERO)
         })
         .rev()
         .cv();
     let duplicates = multiply(
-        &a.chars().map(|c| if c == wildcard { 1 } else { 0 }).cv(),
-        &b.chars()
-            .map(|c| if c == wildcard { 1 } else { 0 })
+        &a.iter()
+            .copied()
+            .map(|c| if c == wildcard { M::ONE } else { M::ZERO })
+            .cv(),
+        &b.iter()
+            .copied()
+            .map(|c| if c == wildcard { M::ONE } else { M::ZERO })
             .rev()
             .cv(),
     );
-    let result = multiply_complex(&ap, &bp).into_iter().map(|x| x.0).cv();
+    let result = multiply(&ap, &bp).into_iter().map(|x| x.0).cv();
     let mut prefix_wildcard = vec![0];
-    for c in a.chars() {
+    for c in a.iter().copied() {
         prefix_wildcard.push(prefix_wildcard.l() + if c == wildcard { 1 } else { 0 });
     }
-    let b_wildcard = b.chars().filter(|c| c == &wildcard).count();
+    let b_wildcard = b.iter().copied().filter(|c| c == &wildcard).count();
     let mut out = Vec::new();
     for i in b.len() - 1..a.len() {
-        let wildcards = b_wildcard + prefix_wildcard[i + 1] - prefix_wildcard[i - (b.len() - 1)];
+        let wildcards = b_wildcard + (prefix_wildcard[i + 1] - prefix_wildcard[i - (b.len() - 1)]);
         out.push(
-            ((result[i] + wildcards as F - *duplicates.get(i).unwrap_or(&0) as F) - b.len() as F)
-                .abs()
-                < 1e-6,
+            result[i] as I
+                == b.len() as I + duplicates.get(i).map(|x| x.0).unwrap_or(0) as I - wildcards as I,
         );
     }
     out

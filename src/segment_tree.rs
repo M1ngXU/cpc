@@ -4,14 +4,8 @@ pub struct SegmentTree {
 impl SegmentTree {
     pub fn new(input: &[SegmentTreeType]) -> Self {
         let n = input.len().next_power_of_two();
-        let mut tree = Vec::with_capacity(2 * n - 1);
-        unsafe {
-            tree.set_len(2 * n - 1);
-        }
+        let mut tree = vec![DEFAULT_SEGMENT_TREE_TYPE; 2 * n - 1];
         tree[n - 1..n - 1 + input.len()].clone_from_slice(input);
-        for i in n - 1 + input.len()..2 * n - 1 {
-            tree[i] = DEFAULT_SEGMENT_TREE_TYPE.clone();
-        }
         for i in (0..n - 1).rev() {
             tree[i] = transform(&tree[2 * i + 1], &tree[2 * i + 2]);
         }

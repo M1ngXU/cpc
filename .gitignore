@@ -2,8 +2,8 @@
 *.out
 *.exe
 *.in
-/src/bin
 Cargo.toml
-/src/bin2
+/src/**/
 Cargo2.toml
+Cargo3.toml
 /cpp

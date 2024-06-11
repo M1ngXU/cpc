@@ -1,12 +1,12 @@
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Vertex<const K: usize> {
-    next: [usize; K],
+    next: [u32; K],
     output: bool,
 }
 impl<const K: usize> Vertex<K> {
     pub fn new() -> Self {
         Self {
-            next: [usize::MAX; K],
+            next: [u32::MAX; K],
             output: false,
         }
     }
@@ -26,18 +26,17 @@ impl<const K: usize> Trie<K> {
     pub fn add_string(&mut self, s: &[usize]) -> usize {
         let mut v = 0;
         for c in s {
-            if self.vertices[v].next[*c] == usize::MAX {
-                self.vertices[v].next[*c] = self.vertices.len();
-                self.vertices[v].size += 1;
+            if self.vertices[v].next[*c] == u32::MAX {
+                self.vertices[v].next[*c] = self.vertices.len() as u32;
                 self.vertices.push(Vertex::new());
             }
-            v = self.vertices[v].next[*c];
+            v = self.vertices[v].next[*c] as usize;
         }
         self.vertices[v].output = true;
         v
     }
 
     pub fn go(&mut self, v: usize, c: usize) -> Option<usize> {
-        (self.vertices[v].next[c] != usize::MAX).then_some(self.vertices[v].next[c])
+        (self.vertices[v].next[c] != u32::MAX).then_some(self.vertices[v].next[c] as usize)
     }
 }

@@ -1,6 +1,7 @@
-type N = Mod<compile_error!()>;
+// type N = Mod<998_244_353>;
+// type N = Mod<1_000_000_007>;
 
-// type N = Mod<156859239850691603>;
+// type N = Mod<156859239850691603>; // randomize hacks possible
 // const K: N = N::new(3414519959);
 
 use std::ops::*;
@@ -44,7 +45,7 @@ impl<const MOD: usize> std::iter::Sum for Mod<MOD> {
 }
 impl<const MOD: usize> std::iter::Product for Mod<MOD> {
     fn product<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Self::ZERO, |a, b| a * b)
+        iter.fold(Self::ONE, |a, b| a * b)
     }
 }
 impl<const MOD: usize> std::fmt::Display for Mod<MOD> {
@@ -89,13 +90,21 @@ impl<const MOD: usize> Sub<usize> for Mod<MOD> {
 impl<const MOD: usize> Mul for Mod<MOD> {
     type Output = Self;
     fn mul(self, rhs: Self) -> Self {
-        Self(((self.0 as u128 * rhs.0 as u128) % MOD as u128) as usize)
+        if MOD < u32::MAX as usize {
+            Self((self.0 * rhs.0) % MOD)
+        } else {
+            Self(((self.0 as u128 * rhs.0 as u128) % MOD as u128) as usize)
+        }
     }
 }
 impl<const MOD: usize> Mul<usize> for Mod<MOD> {
     type Output = Self;
     fn mul(self, rhs: usize) -> Self {
-        Self(((self.0 as u128 * rhs as u128) % MOD as u128) as usize)
+        if MOD < u32::MAX as usize {
+            Self((self.0 * rhs) % MOD)
+        } else {
+            Self(((self.0 as u128 * rhs as u128) % MOD as u128) as usize)
+        }
     }
 }
 impl<const MOD: usize> Div for Mod<MOD> {
