@@ -2,8 +2,11 @@
 *.out
 *.exe
 *.in
-Cargo.toml
+/bin
+Cargo1.toml
 /src/**/
 Cargo2.toml
 Cargo3.toml
 /cpp
+/~
+test_generator.py

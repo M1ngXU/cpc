@@ -1,10 +1,10 @@
-pub struct LazySegmentTreeBeats {
+pub struct LazySegmentTree {
     pub n: usize,
     pub tree: Vec<SegmentTreeType>,
     lazy: Vec<Option<UpdateType>>,
 }
-impl LazySegmentTreeBeats {
-    pub fn new(initial: &[SegmentTreeType]) -> Self {
+impl LazySegmentTree {
+    pub fn new(input: &[SegmentTreeType]) -> Self {
         let n = input.len().next_power_of_two();
         let mut tree = vec![DEFAULT_SEGMENT_TREE_TYPE; 2 * n - 1];
         tree[n - 1..n - 1 + input.len()].clone_from_slice(input);
@@ -80,10 +80,10 @@ impl LazySegmentTreeBeats {
     }
 
     fn update_rec(&mut self, i: usize, il: usize, ir: usize, l: usize, r: usize, v: UpdateType) {
-        if ir <= l || r <= il || todo!("breakCondition") {
+        if ir <= l || r <= il {
             return;
         }
-        if l <= il && ir <= r && todo!("tagCondition") {
+        if l <= il && ir <= r {
             self.tree[i] = update(&self.tree[i], &v, self.len_at(i));
             self.add_lazy(i, &v);
             if i != 0 {

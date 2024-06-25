@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 /// Tries to calculate the square root of x, `None` if `x` is not a perfect square
 pub fn sqrt(x: u128) -> Option<u128> {
     let mut l = 0;

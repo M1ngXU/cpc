@@ -1,4 +1,18 @@
 {
+	"adj": {
+		"scope": "rust",
+		"prefix": "adj",
+		"body": [
+			"$0",
+			"let adj = |i, j| {",
+			"    [(-1, 0), (0, 1), (0, -1), (1, 0)]",
+			"        .into_iter()",
+			"        .map(move |(x, y)| (i as isize + x, j as isize + y))",
+			"        .filter(|&(i, j)| 0 <= i && i < n as isize && 0 <= j && j < m as isize)",
+			"        .map(|(i, j)| (i as usize, j as usize))",
+			"};"
+		]
+	},
 	"aho_corasick": {
 		"scope": "rust",
 		"prefix": "aho_corasick",
@@ -82,7 +96,182 @@
 			"        }",
 			"        self.vertices[v].link",
 			"    }",
+			"}"
+		]
+	},
+	"articulation_bridges": {
+		"scope": "rust",
+		"prefix": "articulation_bridges",
+		"body": [
+			"$0",
+			"let mut dfsin = vec![0; n];",
+			"let mut low = vec![0; n];",
+			"let mut subtree_size = vec![1; n];",
+			"let mut is_art = vec![false; n];",
+			"fn dfs(",
+			"    u: U,",
+			"    edges: &Vec<Vec<U>>,",
+			"    dfsin: &mut Vec<U>,",
+			"    low: &mut Vec<U>,",
+			"    subtree_size: &mut Vec<U>,",
+			"    is_art: &mut Vec<bool>,",
+			"    tt: &mut HashSet<(U, U)>,",
+			"    bridges: &mut Vec<(U, U)>,",
+			"    t: &mut U,",
+			") -> U {",
+			"    *t += 1;",
+			"    dfsin[u] = *t;",
+			"    low[u] = *t;",
+			"    for v in &edges[u] {",
+			"        if dfsin[*v] == 0 {",
+			"            tt.insert((*v.min(&u), *v.max(&u)));",
+			"            let val = dfs(*v, edges, dfsin, low, subtree_size, is_art, tt, bridges, t);",
+			"            subtree_size[u] += subtree_size[*v];",
+			"            if val >= dfsin[u] {",
+			"                is_art[u] = true;",
+			"            }",
+			"            low[u] = low[u].min(val);",
+			"        } else if dfsin[*v] != 0 && !tt.contains(&(*v.min(&u), *v.max(&u))) {",
+			"            low[u] = low[u].min(dfsin[*v]);",
+			"        }",
+			"    }",
+			"    low[u]",
 			"}",
+			"let mut tt = HashSet::new();",
+			"let mut bridges = vec![];",
+			"dfs(",
+			"    0,",
+			"    &graph,",
+			"    &mut dfsin,",
+			"    &mut low,",
+			"    &mut subtree_size,",
+			"    &mut is_art,",
+			"    &mut tt,",
+			"    &mut bridges,",
+			"    &mut 0,",
+			");",
+			"is_art[0] = tt.into_iter().filter(|x| x.0 == 0).count() >= 2;",
+			"for (u, v) in edges {",
+			"    if low[u] > dfsin[v] || low[v] > dfsin[u] {",
+			"        bridges.push((u, v));",
+			"    }",
+			"}"
+		]
+	},
+	"circumcircle": {
+		"scope": "rust",
+		"prefix": "circumcircle",
+		"body": [
+			"$0",
+			"#[inline]",
+			"fn orient2d(pa: [f64; 2], pb: [f64; 2], pc: [f64; 2]) -> f64 {",
+			"    let detleft = (pa[0] - pc[0]) * (pb[1] - pc[1]);",
+			"    let detright = (pa[1] - pc[1]) * (pb[0] - pc[0]);",
+			"    let det = detleft - detright;",
+			"    return det;",
+			"}",
+			"",
+			"type Point = [f64; 2];",
+			"",
+			"fn circumcircle(a: Point, b: Point, c: Point) -> (Point, f64) {",
+			"    let orientation = orient2d(a, b, c);",
+			"",
+			"    let (b, c, denominator) = if orientation > 0. {",
+			"        (b, c, 2. * orientation)",
+			"    } else if orientation < 0. {",
+			"        (c, b, -2. * orientation)",
+			"    } else {",
+			"        panic!()",
+			"    };",
+			"",
+			"    let [acx, acy, bcx, bcy, abx, aby] = [",
+			"        a[0] - c[0],",
+			"        a[1] - c[1],",
+			"        b[0] - c[0],",
+			"        b[1] - c[1],",
+			"        a[0] - b[0],",
+			"        a[1] - b[1],",
+			"    ];",
+			"    let [acxs, acys, bcxs, bcys, abxs, abys] = [",
+			"        acx * acx,",
+			"        acy * acy,",
+			"        bcx * bcx,",
+			"        bcy * bcy,",
+			"        abx * abx,",
+			"        aby * aby,",
+			"    ];",
+			"    let [acxys, bcxys, abxys] = [acxs + acys, bcxs + bcys, abxs + abys];",
+			"    let center = [",
+			"        c[0] + (acxys * bcy - bcxys * acy) / denominator,",
+			"        c[1] + (acx * bcxys - bcx * acxys) / denominator,",
+			"    ];",
+			"    let radius = f64::sqrt(bcxys * acxys * abxys) / denominator;",
+			"    (center, radius)",
+			"}"
+		]
+	},
+	"closest_points": {
+		"scope": "rust",
+		"prefix": "closest_points",
+		"body": [
+			"$0",
+			"fn min<T: PartialOrd>(a: T, b: T) -> T {",
+			"    match a.partial_cmp(&b) {",
+			"        Some(std::cmp::Ordering::Less) => a,",
+			"        _ => b,",
+			"    }",
+			"}",
+			"",
+			"fn point_distance(a: (f64, f64, usize), b: (f64, f64, usize)) -> (f64, usize, usize) {",
+			"    let dx = a.0 - b.0;",
+			"    let dy = a.1 - b.1;",
+			"    (dx * dx + dy * dy, a.2, b.2)",
+			"}",
+			"",
+			"fn closest_points(",
+			"    points: &Vec<(f64, f64, usize)>,",
+			"    start: usize,",
+			"    end: usize,",
+			") -> (f64, usize, usize) {",
+			"    if end - start <= 1 {",
+			"        panic!();",
+			"    } else if end - start == 2 {",
+			"        point_distance(points[start], points[start + 1])",
+			"    } else if end - start == 3 {",
+			"        let d1 = point_distance(points[start], points[start + 1]);",
+			"        let d2 = point_distance(points[start], points[start + 2]);",
+			"        let d3 = point_distance(points[start + 1], points[start + 2]);",
+			"        min(d1, min(d2, d3))",
+			"    } else {",
+			"        let mid = (start + end) >> 1;",
+			"        let mut d = min(",
+			"            closest_points(points, start, mid),",
+			"            closest_points(points, mid, end),",
+			"        );",
+			"",
+			"        let dsqrt = d.0.sqrt();",
+			"",
+			"        let mut middle = points[start..end]",
+			"            .iter()",
+			"            .filter(|x| (x.0 - points[mid].0).abs() <= dsqrt)",
+			"            .copied()",
+			"            .collect::<Vec<_>>();",
+			"        middle.sort_by(|(_, y1, _), (_, y2, _)| y1.total_cmp(y2));",
+			"",
+			"        for i in 0..middle.len() {",
+			"            let p1 = middle[i];",
+			"            d = middle[i + 1..]",
+			"                .iter()",
+			"                .take(7)",
+			"                .map(|p2| point_distance(p1, *p2))",
+			"                .min_by(|p2, p3| p2.partial_cmp(p3).unwrap())",
+			"                .map(|d2| min(d, d2))",
+			"                .unwrap_or(d);",
+			"        }",
+			"",
+			"        d",
+			"    }",
+			"}"
 		]
 	},
 	"combinatorics": {
@@ -137,7 +326,7 @@
 			"        cur_inv /= N::new(i);",
 			"        seen.push((cur, cur_inv));",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"comparator": {
@@ -162,7 +351,7 @@
 			"    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {",
 			"        Some(self.cmp(other))",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"complex": {
@@ -346,7 +535,67 @@
 			"    Sub::sub:SubAssign::sub_assign;",
 			"    Mul::mul:MulAssign::mul_assign;",
 			"    Div::div:DivAssign::div_assign;",
+			"}"
+		]
+	},
+	"count_divisors": {
+		"scope": "rust",
+		"prefix": "count_divisors",
+		"body": [
+			"$0",
+			"// requires sqrt, is_prime",
+			"",
+			"pub struct CountDivisors {",
+			"    primes: Vec<U>,",
 			"}",
+			"impl CountDivisors {",
+			"    pub fn new() -> Self {",
+			"        let n = 1_000_006;",
+			"        let mut lp = vec![0; n + 1];",
+			"        let mut pr = vec![];",
+			"        for i in 2..=n {",
+			"            if lp[i] == 0 {",
+			"                lp[i] = i;",
+			"                pr.push(i);",
+			"            }",
+			"            let mut j = 0;",
+			"            while i * pr[j] <= n {",
+			"                lp[i * pr[j]] = pr[j];",
+			"                if pr[j] == lp[i] {",
+			"                    break;",
+			"                }",
+			"                j += 1;",
+			"            }",
+			"        }",
+			"        Self { primes: pr }",
+			"    }",
+			"    pub fn count(&self, mut n: U) -> U {",
+			"        if n == 1 {",
+			"            return 1;",
+			"        }",
+			"        let mut ans = 1;",
+			"        for p in &self.primes {",
+			"            if p * p * p > n {",
+			"                break;",
+			"            }",
+			"            let mut count = 1;",
+			"            while n % p == 0 {",
+			"                n /= p;",
+			"                count += 1;",
+			"            }",
+			"            ans *= count;",
+			"        }",
+			"        if is_prime(n) {",
+			"            ans * 2",
+			"        } else if sqrt(n as _).is_some_and(|s| is_prime(s as U)) {",
+			"            ans * 3",
+			"        } else if n != 1 {",
+			"            ans * 4",
+			"        } else {",
+			"            ans",
+			"        }",
+			"    }",
+			"}"
 		]
 	},
 	"dfs_low_mem": {
@@ -382,7 +631,7 @@
 			"            todo.extend(todo2);",
 			"        }",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"direct_planar_graph": {
@@ -407,7 +656,7 @@
 			"            lowest_degrees.push(v);",
 			"        }",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"fenwick_tree": {
@@ -444,7 +693,7 @@
 			"    }",
 			"}",
 			"type FenwickTreeType = I;",
-			"const DEFAULT: FenwickTreeType = FenwickTreeType::default();",
+			"const DEFAULT: FenwickTreeType = FenwickTreeType::default();"
 		]
 	},
 	"fft": {
@@ -527,7 +776,139 @@
 			"    fft(&mut fa, true);",
 			"",
 			"    fa",
+			"}"
+		]
+	},
+	"flows": {
+		"scope": "rust",
+		"prefix": "flows",
+		"body": [
+			"$0",
+			"use std::cmp::Reverse;",
+			"use std::collections::BinaryHeap;",
+			"/// Ford-Fulkerson flow/min-cut calculation, can modify (only increase?) capacities after max flow",
+			"/// calculation",
+			"#[derive(Debug, Clone, PartialEq, Eq)]",
+			"pub struct FFFlows {",
+			"    network: Vec<Vec<(usize, usize)>>,",
+			"    rev: Vec<Vec<(usize, usize)>>,",
+			"    indeces: Vec<HashMap<usize, usize>>,",
+			"    flow: Vec<Vec<usize>>,",
 			"}",
+			"impl FFFlows {",
+			"    pub fn new(network: Vec<Vec<(usize, usize)>>) -> Self {",
+			"        let flow = network.iter().map(|e| vec![0; e.len()]).cv();",
+			"        let mut rev = vec![vec![]; network.len()];",
+			"        let mut indeces = vec![HashMap::new(); network.len()];",
+			"        for (u, e) in network.iter().enumerate() {",
+			"            for (i, (v, _)) in e.iter().enumerate() {",
+			"                indeces[u].insert(*v, i);",
+			"                rev[*v].push((u, i));",
+			"            }",
+			"        }",
+			"        Self {",
+			"            flow,",
+			"            indeces,",
+			"            rev,",
+			"            network,",
+			"        }",
+			"    }",
+			"",
+			"    /// Calculate the maximum flow between source/sink, use `max_flow != 0` if some capacities were",
+			"    /// increased",
+			"    pub fn calculate(",
+			"        &mut self,",
+			"        mut max_flow: usize,",
+			"        source: usize,",
+			"        sink: usize,",
+			"    ) -> (usize, Vec<bool>) {",
+			"        loop {",
+			"            match self.find_augmenting_path(source, sink) {",
+			"                Ok(augmenting_path) => {",
+			"                    max_flow += augmenting_path.get(0).map(|x| x.3).unwrap_or(0).abs() as usize;",
+			"                    for (_, u, i, increase) in augmenting_path {",
+			"                        if increase > 0 {",
+			"                            self.flow[u][i] += increase as usize;",
+			"                        } else {",
+			"                            self.flow[u][i] -= (-increase) as usize;",
+			"                        }",
+			"                    }",
+			"                }",
+			"                Err(cut) => {",
+			"                    return (max_flow, cut);",
+			"                }",
+			"            }",
+			"        }",
+			"    }",
+			"",
+			"    fn find_augmenting_path(",
+			"        &self,",
+			"        source: usize,",
+			"        sink: usize,",
+			"    ) -> Result<Vec<(usize, usize, usize, isize)>, Vec<bool>> {",
+			"        let mut parent = vec![(usize::MAX, usize::MAX, usize::MAX, 0_isize); self.network.len()];",
+			"        let mut dists = vec![usize::MAX; self.network.len()];",
+			"        parent[source].0 = source;",
+			"        dists[source] = 0;",
+			"        let mut todo = BinaryHeap::new();",
+			"        todo.push((Reverse(0), source));",
+			"        while let Some((Reverse(d), u)) = todo.pop() {",
+			"            if dists[u] < d {",
+			"                continue;",
+			"            }",
+			"            if u == sink {",
+			"                let mut path = Vec::new();",
+			"                let mut cur = parent[sink];",
+			"                while cur.1 != usize::MAX {",
+			"                    path.push(cur);",
+			"                    cur = parent[cur.0];",
+			"                }",
+			"                path.reverse();",
+			"                let eps = path.iter().map(|x| x.3.abs()).mn();",
+			"                eprintln!(\"{eps}\");",
+			"                for x in &mut path {",
+			"                    x.3 = x.3.clamp(-eps, eps);",
+			"                }",
+			"                return Ok(path);",
+			"            }",
+			"            for (i, ((v, capacity), flow)) in self.network[u].iter().zip(&self.flow[u]).enumerate()",
+			"            {",
+			"                if flow < capacity {",
+			"                    let diff = capacity - flow;",
+			"                    if dists[*v] > d + diff {",
+			"                        dists[*v] = d + diff;",
+			"                        parent[*v] = (u, u, i, diff as isize);",
+			"                        todo.push((Reverse(d + diff), *v));",
+			"                    }",
+			"                }",
+			"            }",
+			"            for (v, i) in &self.rev[u] {",
+			"                let diff = self.flow[*v][*i];",
+			"                if diff > 0 {",
+			"                    if dists[*v] > d + diff {",
+			"                        dists[*v] = d + diff;",
+			"                        parent[*v] = (u, *v, *i, -(diff as isize));",
+			"                        todo.push((Reverse(d + diff), *v));",
+			"                    }",
+			"                }",
+			"            }",
+			"        }",
+			"        Err(parent.into_iter().map(|(p, _, _, _)| p != usize::MAX).cv())",
+			"    }",
+			"",
+			"    pub fn increase_capacity(&mut self, u: usize, v: usize, increase_by: usize) {",
+			"        self.network[u][self.indeces[u][&v]].1 += increase_by;",
+			"    }",
+			"",
+			"    pub fn get_capacity(&self, u: usize, v: usize) -> Option<usize> {",
+			"        self.indeces[u].get(&v).map(|&i| self.network[u][i].1)",
+			"    }",
+			"",
+			"    pub fn get_flow(&self, u: usize, v: usize) -> Option<usize> {",
+			"        self.indeces[u].get(&v).map(|&i| self.flow[u][i])",
+			"    }",
+			"}",
+			""
 		]
 	},
 	"good_primes.txt": {
@@ -536,7 +917,7 @@
 		"body": [
 			"$0",
 			"type N = Mod<156859239850691603>;",
-			"const K: N = N::new(3414519959);",
+			"const K: N = N::new(3414519959);"
 		]
 	},
 	"graph": {
@@ -549,7 +930,7 @@
 			"    let (u, v) = r!(usize, usize);",
 			"    edges[u - 1].push(v - 1);",
 			"    edges[v - 1].push(u - 1);",
-			"}",
+			"}"
 		]
 	},
 	"hld": {
@@ -707,7 +1088,7 @@
 			"        }",
 			"        a",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"interpolate_polynomial": {
@@ -749,21 +1130,71 @@
 			"        res += x.pow(i) * *c;",
 			"    }",
 			"    res",
-			"}",
+			"}"
 		]
 	},
-	"lazy_segment_tree_beats": {
+	"is_prime": {
 		"scope": "rust",
-		"prefix": "lazy_segment_tree_beats",
+		"prefix": "is_prime",
 		"body": [
 			"$0",
-			"pub struct LazySegmentTreeBeats {",
+			"fn pow(a: usize, mut e: usize, n: usize) -> usize {",
+			"    let mut res = 1;",
+			"    let mut cur = a;",
+			"    while e > 0 {",
+			"        if e & 1 == 1 {",
+			"            res = ((res as u128 * cur as u128) % n as u128) as usize;",
+			"        }",
+			"        cur = ((cur as u128 * cur as u128) % n as u128) as usize;",
+			"        e >>= 1;",
+			"    }",
+			"    res",
+			"}",
+			"",
+			"fn is_prime(n: U) -> bool {",
+			"    if n == 1 {",
+			"        false",
+			"    } else if n == 2 {",
+			"        true",
+			"    } else if n == 3 {",
+			"        true",
+			"    } else if n & 1 == 0 {",
+			"        false",
+			"    } else {",
+			"        let mut rng = Rng::new();",
+			"        let s = (n - 1).trailing_zeros();",
+			"        let d = (n - 1) >> s;",
+			"        for _ in 0..100 {",
+			"            let a = rng.next() as U % (n - 4) + 2;",
+			"            let mut x = pow(a, d, n);",
+			"            for _ in 0..s {",
+			"                let y = ((x as u128 * x as u128) % n as u128) as usize;",
+			"                if y == 1 && x != 1 && x != n - 1 {",
+			"                    return false;",
+			"                }",
+			"                x = y;",
+			"            }",
+			"            if x != 1 {",
+			"                return false;",
+			"            }",
+			"        }",
+			"        true",
+			"    }",
+			"}"
+		]
+	},
+	"lazy_segment_tree": {
+		"scope": "rust",
+		"prefix": "lazy_segment_tree",
+		"body": [
+			"$0",
+			"pub struct LazySegmentTree {",
 			"    pub n: usize,",
 			"    pub tree: Vec<SegmentTreeType>,",
 			"    lazy: Vec<Option<UpdateType>>,",
 			"}",
-			"impl LazySegmentTreeBeats {",
-			"    pub fn new(initial: &[SegmentTreeType]) -> Self {",
+			"impl LazySegmentTree {",
+			"    pub fn new(input: &[SegmentTreeType]) -> Self {",
 			"        let n = input.len().next_power_of_two();",
 			"        let mut tree = vec![DEFAULT_SEGMENT_TREE_TYPE; 2 * n - 1];",
 			"        tree[n - 1..n - 1 + input.len()].clone_from_slice(input);",
@@ -839,10 +1270,10 @@
 			"    }",
 			"",
 			"    fn update_rec(&mut self, i: usize, il: usize, ir: usize, l: usize, r: usize, v: UpdateType) {",
-			"        if ir <= l || r <= il || todo!(\"breakCondition\") {",
+			"        if ir <= l || r <= il {",
 			"            return;",
 			"        }",
-			"        if l <= il && ir <= r && todo!(\"tagCondition\") {",
+			"        if l <= il && ir <= r {",
 			"            self.tree[i] = update(&self.tree[i], &v, self.len_at(i));",
 			"            self.add_lazy(i, &v);",
 			"            if i != 0 {",
@@ -876,7 +1307,7 @@
 			"}",
 			"pub fn update(old: &SegmentTreeType, update: &UpdateType, segment_len: usize) -> SegmentTreeType {",
 			"    todo!()",
-			"}",
+			"}"
 		]
 	},
 	"lca": {
@@ -946,7 +1377,7 @@
 			"        }",
 			"        (self.up[u][0], self.up[u][1])",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"maximum_weight_bipartite_matching": {
@@ -1048,7 +1479,7 @@
 			"        path.reverse();",
 			"        Some(path)",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"modint": {
@@ -1264,7 +1695,7 @@
 			"    Sub::sub:SubAssign::sub_assign;",
 			"    Mul::mul:MulAssign::mul_assign;",
 			"    Div::div:DivAssign::div_assign;",
-			"}",
+			"}"
 		]
 	},
 	"ntt": {
@@ -1346,7 +1777,7 @@
 			"    fft(&mut fa, true);",
 			"",
 			"    fa",
-			"}",
+			"}"
 		]
 	},
 	"pattern_matching_wildcards": {
@@ -1414,7 +1845,7 @@
 			"        );",
 			"    }",
 			"    out",
-			"}",
+			"}"
 		]
 	},
 	"persistent_segment_tree": {
@@ -1528,7 +1959,7 @@
 			"}",
 			"pub fn update(old: &SegmentTreeType, update: &UpdateType) -> SegmentTreeType {",
 			"    todo!()",
-			"}",
+			"}"
 		]
 	},
 	"polyprod": {
@@ -1570,7 +2001,7 @@
 			"    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {",
 			"        Some(self.cmp(other))",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"rope": {
@@ -1624,7 +2055,7 @@
 			"            self.tree[i] = self.tree[2 * i + 1] + self.tree[2 * i + 2];",
 			"        }",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"segment_tree": {
@@ -1692,7 +2123,7 @@
 			"",
 			"pub fn transform(lhs: &SegmentTreeType, rhs: &SegmentTreeType) -> SegmentTreeType {",
 			"    todo!()",
-			"}",
+			"}"
 		]
 	},
 	"sieve": {
@@ -1722,7 +2153,7 @@
 			"            j += 1;",
 			"        }",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"sqrt": {
@@ -1730,6 +2161,8 @@
 		"prefix": "sqrt",
 		"body": [
 			"$0",
+			"use std::cmp::Ordering;",
+			"",
 			"/// Tries to calculate the square root of x, `None` if `x` is not a perfect square",
 			"pub fn sqrt(x: u128) -> Option<u128> {",
 			"    let mut l = 0;",
@@ -1743,7 +2176,7 @@
 			"        }",
 			"    }",
 			"    None",
-			"}",
+			"}"
 		]
 	},
 	"template": {
@@ -2118,7 +2551,7 @@
 			"    }",
 			"}};",
 			"}",
-			"}",
+			"}"
 		]
 	},
 	"trie": {
@@ -2167,7 +2600,7 @@
 			"    pub fn go(&mut self, v: usize, c: usize) -> Option<usize> {",
 			"        (self.vertices[v].next[c] != u32::MAX).then_some(self.vertices[v].next[c] as usize)",
 			"    }",
-			"}",
+			"}"
 		]
 	},
 	"z": {
@@ -2194,7 +2627,7 @@
 			"        }",
 			"    }",
 			"    z",
-			"}",
+			"}"
 		]
-	},
+	}
 }
