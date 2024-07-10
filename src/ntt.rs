@@ -7,7 +7,7 @@ const ROOT_PW: usize = 1 << 23;
 const G: M = M::new(3);
 const ROOT: M = G.pow(C);
 const ROOT_1: M = ROOT.inv();
-type M = Mod<MOD>;
+type M = Mod;
 
 // from https://cp-algorithms.com/algebra/fft.html#number-theoretic-transform
 pub fn fft(a: &mut Vec<M>, invert: bool) {

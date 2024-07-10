@@ -96,5 +96,10 @@
         "thread": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp"
-    }
+    },
+    "workspace.ignoredFolders": [
+        "$CARGO_HOME",
+        "$CARGO_HOME/.cargo/**",
+        "$CARGO_HOME/.rustup/**"
+    ]
 }
