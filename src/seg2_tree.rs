@@ -1,27 +1,23 @@
 pub struct SegmentTree {
     pub tree: Vec<SegmentTreeType>,
+    pub n: usize
 }
 impl SegmentTree {
     pub fn new(input: &[SegmentTreeType]) -> Self {
         let n = input.len();
-        let mut tree = vec![DEFAULT_SEGMENT_TREE_TYPE; 2 * n];
+        let mut tree = vec![DEFAULT_SEGMENT_TREE_TYPE; n << 1];
         tree[n..n + input.len()].clone_from_slice(input);
         for i in (1..n).rev() {
             tree[i] = transform(&tree[i << 1], &tree[(i << 1) | 1]);
         }
-        Self { tree }
-    }
-
-    #[inline(always)]
-    pub fn n(&self) -> U {
-        self.tree.len() >> 1
+        Self { tree, n }
     }
 
     /// Query the segment tree for the range [l, r).
     pub fn query(&self, mut l: usize, mut r: usize) -> Option<SegmentTreeType> {
         let mut res: Option<SegmentTreeType> = None;
-        l += self.n();
-        r += self.n();
+        l += self.n;
+        r += self.n;
         while l < r {
             if l & 1 == 1 {
                 res = Some(if let Some(v) = res {
