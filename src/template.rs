@@ -280,7 +280,8 @@ mod lib {
         let (mut i, mut o) = (Some(Input(read_next_line())), Output(String::new()));
         unsafe {
             INPUT = i;
-            OUTPUT = o;
+            OUTPUT = o; // fairly useless, can be removed; currently only "resets" output string
+                        // (which should be a noop)
         }
         IO
     }

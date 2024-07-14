@@ -146,8 +146,8 @@ mod redblack {
             Self::default()
         }
 
-        pub fn into_unsorted_vec(self) -> Vec<(K, V)> {
-            self.nodes
+        pub fn into_unsorted_iter(self) -> impl Iterator<Item = (K, V)> {
+            self.nodes.into_iter().map(|node| (node.key, node.value))
         }
 
         pub fn random(&self) -> Option<(&K, &V)> {
@@ -155,8 +155,7 @@ mod redblack {
                 None
             } else {
                 let mut rng = Rng::new();
-                let r = ((rng.next() as usize) << 32) | rng.next() as usize;
-                let rank = r % self.len();
+                let rank = rng.next_u() % self.len();
                 let node = &self.nodes[self.select_from_node(rank, self.root.unwrap())];
                 Some((&node.key, &node.value))
             }

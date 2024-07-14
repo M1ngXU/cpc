@@ -143,7 +143,11 @@ async fn main() -> io::Result<()> {
                             println!("Ok!");
                         } else {
                             println!("Output does not match:");
-                            println!("========");
+                            println!("=ACTUAL=");
+                            print!("{actual}");
+                            println!("==EXP===");
+                            print!("{expected}");
+                            println!("==DIFF==");
                             for (i, line) in
                                 expected.lines().zip_longest(actual.lines()).enumerate()
                             {
