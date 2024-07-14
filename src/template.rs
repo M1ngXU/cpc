@@ -1,5 +1,5 @@
 fn main() {
-    let _io = Io::new();
+    let _io = io();
     for _ in 0..r!(U) {
         // let (n, q) = r!(U, U);
         // let n = r!(U);
