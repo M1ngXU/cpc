@@ -54,6 +54,20 @@ impl Rng {
         self.seed ^= self.seed << 5;
         self.seed
     }
+
+    pub fn next_u64(&mut self) -> u64 {
+        let (l, u) = (self.next(), self.next());
+        ((l as u64) << 32) | u as u64
+    }
+
+    pub fn next_u128(&mut self) -> u128 {
+        let (l, u) = (self.next(), self.next());
+        ((l as u128) << 64) | u as u128
+    }
+
+    pub fn next_u(&mut self) -> usize {
+        self.next_u64() as usize
+    }
 }
 pub trait IterExt<T> {
     fn n(&mut self) -> T;
@@ -124,7 +138,8 @@ mod lib {
     pub use std::f64::consts::*;
     pub use std::fmt::Write;
     use std::io::*;
-    use std::str::SplitWhitespace;
+    use std::iter::Filter;
+    use std::str::{Split, SplitWhitespace};
     pub struct Output(String);
     impl AsRef<String> for Output {
         fn as_ref(&self) -> &String {
@@ -150,30 +165,37 @@ mod lib {
     ($t:expr) => {{
         let _ = writeln!(output().as_mut(), "{}", $t);
     }};
-    ($($t:expr,)* $end:expr $(,)?) => {{
+    ($start:expr $(,$t:expr)* $(,)?) => {{
         let o = output().as_mut();
+        let _ = write!(o, "{}", $start);
         $(
-            let _ = write!(o, "{} ", $t);
+            let _ = write!(o, " {}", $t);
         )*
-        let _ = writeln!(o, "{}", $end);
+        let _ = writeln!(o);
     }};
 }
-    pub struct Input(pub SplitWhitespace<'static>);
+    type InputInner = (Split<'static, &'static [char]>, String);
+    pub struct Input(InputInner); // must drop both at the same time (or the iterator first)
     impl Input {
         #[inline(always)]
         pub fn get_next(&mut self) -> &'static str {
             loop {
-                if let Some(n) = self.0.next() {
-                    return n;
+                if let Some(n) = self.0 .0.next() {
+                    if !n.is_empty() {
+                        return n;
+                    }
                 } else {
-                    let mut s = String::new();
-                    stdin().read_line(&mut s).unwrap();
-                    let ss: &'static mut str = unsafe { std::mem::transmute(s.as_mut_str()) };
-                    std::mem::forget(s);
-                    self.0 = ss.split_whitespace();
+                    self.0 = read_next_line();
                 }
             }
         }
+    }
+    const SKIP_CHARS: [char; 5] = [' ', '\n', '\r', '\t', ','];
+    fn read_next_line() -> InputInner {
+        let mut s = String::new();
+        stdin().read_line(&mut s).unwrap();
+        let ss: &'static mut str = unsafe { std::mem::transmute(s.as_mut_str()) };
+        (ss.split(&SKIP_CHARS), s)
     }
     static mut INPUT: Option<Input> = None;
     #[inline(always)]
@@ -255,13 +277,7 @@ mod lib {
     }};
 }
     pub fn io() -> IO {
-        let mut s = String::new();
-        stdin()
-            .read_line(&mut s)
-            .expect("Failed to read from `stdin`.");
-        let ss: &'static mut str = unsafe { std::mem::transmute(s.as_mut_str()) };
-        std::mem::forget(s);
-        let (mut i, mut o) = (Some(Input(ss.split_whitespace())), Output(String::new()));
+        let (mut i, mut o) = (Some(Input(read_next_line())), Output(String::new()));
         unsafe {
             INPUT = i;
             OUTPUT = o;
