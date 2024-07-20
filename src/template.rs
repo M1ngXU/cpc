@@ -266,7 +266,7 @@ mod lib {
             lin::<$t, _, $c<_>>($n)
         };
         ($n:expr, $m:expr; $c1:tt<$c2:tt<$t:tt>>) => {
-            grid::<$t, _, $c2<_>, $c1<$c2<_>>>($n, $m);
+            grid::<$t, _, $c2<_>, $c1<$c2<_>>>($n, $m)
         };
     }
     #[macro_export]

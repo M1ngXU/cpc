@@ -44,7 +44,7 @@ impl SegmentTree {
     pub fn update(&mut self, i: usize, v: SegmentTreeType) {
         let n = (self.tree.len() + 1) / 2;
         let mut i = i + n;
-        self.tree[i] += v;
+        self.tree[i] = v;
         while i > 1 {
             i >>= 1;
             self.tree[i] = transform(&self.tree[i << 1], &self.tree[(i << 1) | 1]);
